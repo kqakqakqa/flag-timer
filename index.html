@@ -13,7 +13,7 @@
             text-align: center;
         }
         .timer-display {
-            font-family: 'Courier New', monospace; /* 等宽字体 */
+            font-family: monospace;
             font-size: 48px;
             margin: 20px 0;
             padding: 10px;
@@ -30,7 +30,7 @@
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            background-color: #cccccc; /* 按钮背景改为#cccccc */
+            background-color: #f0f0f0;
             color: #333;
         }
         button:disabled {
@@ -44,7 +44,7 @@
             padding-top: 20px;
         }
         .lap-item {
-            font-family: 'Courier New', monospace; /* 等宽字体 */
+            font-family: monospace;
             padding: 8px 0;
             border-bottom: 1px solid #eee;
         }
@@ -121,6 +121,8 @@
             
             elapsedTime = 0;
             updateDisplay();
+            
+            startTimer();
         }
         
         startStopBtn.addEventListener('click', function() {
