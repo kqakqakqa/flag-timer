@@ -19,6 +19,14 @@
             padding: 10px;
             background-color: #f0f0f0;
             border-radius: 5px;
+            line-height: 1.2;
+        }
+        .total-time {
+            font-size: 36px;
+        }
+        .delta-time {
+            font-size: 24px;
+            color: #666;
         }
         .controls {
             margin: 20px 0;
@@ -47,12 +55,20 @@
             font-family: monospace;
             padding: 8px 0;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .lap-delta {
+            color: #666;
         }
     </style>
 </head>
 <body>
     <h1>计时器</h1>
-    <div class="timer-display" id="display">00:00:00.00</div>
+    <div class="timer-display">
+        <div class="total-time" id="totalDisplay">00:00:00.00</div>
+        <div class="delta-time" id="deltaDisplay">+00:00:00.00</div>
+    </div>
     <div class="controls">
         <button id="startStop">▶️</button>
         <button id="reset">🚩</button>
@@ -61,33 +77,33 @@
         <h3>计时记录</h3>
         <div id="lapTimes"></div>
     </div>
-
     <script>
         let startTime;
+        let lastLapTime = 0;
         let elapsedTime = 0;
         let timerInterval;
         let isRunning = false;
-        
-        const display = document.getElementById('display');
+        const totalDisplay = document.getElementById('totalDisplay');
+        const deltaDisplay = document.getElementById('deltaDisplay');
         const startStopBtn = document.getElementById('startStop');
         const resetBtn = document.getElementById('reset');
         const lapTimesList = document.getElementById('lapTimes');
-        
+
         function formatTime(ms) {
             let date = new Date(ms);
             let hours = date.getUTCHours().toString().padStart(2, '0');
             let minutes = date.getUTCMinutes().toString().padStart(2, '0');
             let seconds = date.getUTCSeconds().toString().padStart(2, '0');
-            // 只显示百分之一秒（除以10然后取整）
             let centiseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
-            
             return `${hours}:${minutes}:${seconds}.${centiseconds}`;
         }
-        
+
         function updateDisplay() {
-            display.textContent = formatTime(elapsedTime);
+            totalDisplay.textContent = formatTime(elapsedTime);
+            const delta = elapsedTime - lastLapTime;
+            deltaDisplay.textContent = `+${formatTime(delta)}`;
         }
-        
+
         function startTimer() {
             if (!isRunning) {
                 startTime = Date.now() - elapsedTime;
@@ -99,7 +115,7 @@
                 startStopBtn.textContent = '⏸️';
             }
         }
-        
+
         function stopTimer() {
             if (isRunning) {
                 clearInterval(timerInterval);
@@ -107,24 +123,26 @@
                 startStopBtn.textContent = '▶️';
             }
         }
-        
+
         function resetTimer() {
             stopTimer();
-            
-            // 只有在有计时时才记录
             if (elapsedTime > 0) {
+                const delta = elapsedTime - lastLapTime;
                 const lapItem = document.createElement('div');
                 lapItem.className = 'lap-item';
-                lapItem.textContent = formatTime(elapsedTime);
+                lapItem.innerHTML = `
+                    <span class="lap-delta">+${formatTime(delta)}</span>
+                    <span class="lap-total">${formatTime(elapsedTime)}</span>
+                `;
                 lapTimesList.prepend(lapItem);
+                lastLapTime = elapsedTime;
             }
-            
             elapsedTime = 0;
+            lastLapTime = 0;
             updateDisplay();
-            
             startTimer();
         }
-        
+
         startStopBtn.addEventListener('click', function() {
             if (isRunning) {
                 stopTimer();
@@ -132,10 +150,8 @@
                 startTimer();
             }
         });
-        
+
         resetBtn.addEventListener('click', resetTimer);
-        
-        // 初始化显示
         updateDisplay();
     </script>
 </body>
