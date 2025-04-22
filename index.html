@@ -14,7 +14,6 @@
         }
         .timer-display {
             font-family: monospace;
-            font-size: 48px;
             margin: 20px 0;
             padding: 10px;
             background-color: #f0f0f0;
@@ -71,7 +70,8 @@
     </div>
     <div class="controls">
         <button id="startStop">▶️</button>
-        <button id="reset">🚩</button>
+        <button id="flag">🚩</button>
+        <button id="reset">🗑️</button>
     </div>
     <div class="lap-list">
         <h3>计时记录</h3>
@@ -79,13 +79,14 @@
     </div>
     <script>
         let startTime;
-        let lastLapTime = 0;
+        let lastFlagTime = 0;
         let elapsedTime = 0;
         let timerInterval;
         let isRunning = false;
         const totalDisplay = document.getElementById('totalDisplay');
         const deltaDisplay = document.getElementById('deltaDisplay');
         const startStopBtn = document.getElementById('startStop');
+        const flagBtn = document.getElementById('flag');
         const resetBtn = document.getElementById('reset');
         const lapTimesList = document.getElementById('lapTimes');
 
@@ -100,7 +101,7 @@
 
         function updateDisplay() {
             totalDisplay.textContent = formatTime(elapsedTime);
-            const delta = elapsedTime - lastLapTime;
+            const delta = elapsedTime - lastFlagTime;
             deltaDisplay.textContent = `+${formatTime(delta)}`;
         }
 
@@ -124,10 +125,9 @@
             }
         }
 
-        function resetTimer() {
-            stopTimer();
+        function recordFlag() {
             if (elapsedTime > 0) {
-                const delta = elapsedTime - lastLapTime;
+                const delta = elapsedTime - lastFlagTime;
                 const lapItem = document.createElement('div');
                 lapItem.className = 'lap-item';
                 lapItem.innerHTML = `
@@ -135,12 +135,17 @@
                     <span class="lap-total">${formatTime(elapsedTime)}</span>
                 `;
                 lapTimesList.prepend(lapItem);
-                lastLapTime = elapsedTime;
+                lastFlagTime = elapsedTime;
+                updateDisplay();
             }
+        }
+
+        function fullReset() {
+            stopTimer();
             elapsedTime = 0;
-            lastLapTime = 0;
+            lastFlagTime = 0;
+            lapTimesList.innerHTML = '';
             updateDisplay();
-            startTimer();
         }
 
         startStopBtn.addEventListener('click', function() {
@@ -151,7 +156,9 @@
             }
         });
 
-        resetBtn.addEventListener('click', resetTimer);
+        flagBtn.addEventListener('click', recordFlag);
+        resetBtn.addEventListener('click', fullReset);
+
         updateDisplay();
     </script>
 </body>
